@@ -45,12 +45,6 @@ def createInput(degree,totalT,presentT,spat_speed,amplitude=0.3,s_f=1.12):
         img  = img[int(edge/2):int(edge/2)+s_input,int(edge/2):int(edge/2)+s_input]
         img_list[i] = img
 
-        plt.figure()
-        plt.imshow(img_list[i],cmap='gray',interpolation='none',vmin=0.0,vmax=0.5)
-        plt.colorbar()
-        plt.savefig('Output/direct_gratingSinus/inpt_d1_degree_%i_spatFreq_%i_sF_%f_%i.png'%(degree,spat_speed,s_f,i))
-        plt.close()
-
     return(img_list)        
 
 def main():

@@ -270,7 +270,7 @@ def plotData(name):
 
 def startAnalyze():
 
-    name_l = ['RGC','LGN','E1','IL1','E2','IL2'] 
+    name_l = ['RGC','LGN','E1','IL1'] 
 
     if not os.path.exists('Output/STRF/'):
         os.mkdir('Output/STRF/')
@@ -296,18 +296,6 @@ def startAnalyze():
 
     return -1
 
-    spk_IL1 = np.load('./work/STRF_Spk_I1.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_IL1,49,time_back,name_l[3]) # STRF for IL1
-    plotData(name_l[3])
-
-
-    spk_E2 = np.load('./work/STRF_Spk_E2.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_E2,49,time_back,name_l[4]) # STRF for E2
-    plotData(name_l[4])
-
-    spk_IL2 = np.load('./work/STRF_Spk_I2.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_IL2,49,time_back,name_l[5]) # STRF for IL2
-    plotData(name_l[5])
 
 
 #------------------------------------------------------------------------------

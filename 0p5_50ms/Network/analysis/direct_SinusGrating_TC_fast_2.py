@@ -158,8 +158,6 @@ def main():
     rf_I1 = rf_I1[:,:,:,0] - rf_I1[:,:,:,1]
 
 
-    dsi_maz = np.zeros((n_contrast,n_cellsE1)) #DSI after Mazurek et al. (2014) // (R_pref - R_null)/(R_pref)
-    dsi_will = np.zeros((n_contrast,n_cellsE1))#DSI after Willson et al. (2018)// (R_pref - R_null)/(R_pref + R_null)
     dsi_kim = np.zeros((n_contrast,n_cellsE1))#DSI after Kim and Freeman (2016)// 1-(R_null/R_pref)
 
     preff_E1 = np.zeros((n_contrast,n_cellsE1,3)) # save the indices(!) of preffered speed[0], spatF[1], direction[2]
@@ -211,24 +209,7 @@ def main():
                 null_arg = np.copy(preff_arg)
                 preff_arg = preff_t
 
-            dsi_maz[i, c] = (spk_cell[preff_arg] - spk_cell[null_arg])/(spk_cell[preff_arg])
-            dsi_will[i,c] = (spk_cell[preff_arg] - spk_cell[null_arg])/(spk_cell[preff_arg] + spk_cell[null_arg] )
             dsi_kim[i,c] = 1 - (spk_cell[null_arg]/spk_cell[preff_arg])            
-
-        print(dsi_maz[i])
-        plt.figure()
-        plt.hist(dsi_maz[i])
-        plt.ylabel('# of cells')
-        plt.xlabel('DSI Mazurek')
-        plt.savefig('Output/DSI_TC/LVL_%i/Hist_dsi_maz.png'%(i))
-        plt.close()
-
-        plt.figure()
-        plt.hist(dsi_will[i])
-        plt.ylabel('# of cells')
-        plt.xlabel('DSI Willson')
-        plt.savefig('Output/DSI_TC/LVL_%i/Hist_dsi_will.png'%(i))
-        plt.close()
 
         plt.figure()
         plt.hist(dsi_kim[i])
@@ -297,36 +278,12 @@ def moreDSI():
     ampl_list = np.load('./work/ampDiffFFT2D.npy')
     print(np.shape(mse_list), np.shape(ampl_list))
 
-    plt.figure()
-    plt.scatter(mse_list,dsi_kim[0])
-    plt.xlabel('RMSE')
-    plt.ylabel('DSI')
-    plt.savefig('./Output/DSI_TC/RMSE_DSI')
-    plt.close()
-
-    plt.figure()
-    plt.scatter(ampl_list,dsi_kim[0])
-    plt.xlabel('TFD')
-    plt.ylabel('DSI')
-    plt.savefig('./Output/DSI_TC/TFD_DSI')
-    plt.close()
-
     mse_min = np.where(mse_list<0.035)[0]
     dsi_min = dsi_kim[0, mse_min]
     mse_min = mse_list[mse_min]
     mse_max = np.where(mse_list>0.17)[0]
     dsi_max = dsi_kim[0, mse_max]
     mse_max = mse_list[mse_max]
-
-    plt.figure()
-    plt.scatter(mse_min,dsi_min, label='min')
-    plt.scatter(mse_max,dsi_max, label='max')
-    plt.legend()
-    plt.xlabel('RMSE')
-    plt.ylabel('DSI')
-    plt.savefig('./Output/DSI_TC/RMSE_DSI_min_max')
-    plt.close()
-    
 
     tfd_min = np.where(ampl_list<0.01)[0]
     dsi_min = dsi_kim[0, tfd_min]
@@ -335,41 +292,6 @@ def moreDSI():
     print(tfd_max)
     dsi_max = dsi_kim[0, tfd_max]
     tfd_max = ampl_list[tfd_max]
-
-    plt.figure()
-    plt.scatter(tfd_min,dsi_min, label='min')
-    plt.scatter(tfd_max,dsi_max, label='max')
-    plt.legend()
-    plt.xlabel('TFD')
-    plt.ylabel('DSI')
-    plt.savefig('./Output/DSI_TC/TFD_DSI_min_max')
-    plt.close()
-
-
-    #delta_fitt = np.load('./work/1DGabor_Fitt_Delta.npy')
-    #print(np.shape(delta_fitt))
-
- 
-
-    #dsi_kim_fitt = dsi_kim[0,0:16]
-    #delta_phi = np.max(delta_fitt[:,:,4], axis=1)
-    #plt.figure()
-    #plt.scatter(delta_phi, dsi_kim_fitt)
-    #plt.savefig('./Output/DSI_TC/phi_to_dsi')
-    #plt.close()
-    #print(np.where(dsi_kim_fitt > 0.7))
-    #print(np.where(dsi_kim_fitt < 0.4))
-
-    #plt.figure()
-    #plt.subplot(121)
-    #plt.plot(dsi_kim_fitt,'o')
-    #plt.ylabel('DSI')
-    #plt.subplot(122)
-    #plt.plot(delta_phi,'o')
-    #plt.ylabel('phi')
-    #plt.savefig('./Output/DSI_TC/phi_and_dsi')
-    #plt.close()
-
 
     n_cells = n_post
     ## save how many cells have a specific speed or spatF level (depending on max FR)
@@ -582,21 +504,6 @@ def moreDSI():
     high_dsi_arg = np.where(dsi_kim[0] >= 0.8)[0]
 
 
-    plt.figure()
-    plt.plot([1,2], [np.mean(ratio_pref[low_dsi_arg]),np.mean(ratio_null[low_dsi_arg])], marker='^', markersize = 8 ,label='0.0-0.2')
-    plt.plot([1,2], [np.mean(ratio_pref[mid_low_dsi_arg]),np.mean(ratio_null[mid_low_dsi_arg])], marker='X', markersize = 8,label='0.2-0.4')
-    plt.plot([1,2], [np.mean(ratio_pref[mid_dsi_arg]),np.mean(ratio_null[mid_dsi_arg])], marker='*', markersize = 8,label='0.4-0.6')
-    plt.plot([1,2], [np.mean(ratio_pref[mid_high_dsi_arg]),np.mean(ratio_null[mid_high_dsi_arg])], marker='s', markersize = 8,label='0.6-0.8')
-    plt.plot([1,2], [np.mean(ratio_pref[high_dsi_arg]),np.mean(ratio_null[high_dsi_arg])], marker='o', markersize = 8,label='0.8-1.0')
-    plt.xlim(0.75,2.25)
-    #plt.ylim(0.7,0.925)
-    plt.legend(ncol=2)
-    plt.ylabel('E/I ratio')
-    plt.xticks([1,2],['Pref','Null'])
-    
-    plt.savefig('./Output/DSI_TC/EI_ratio_scatter')
-
-
     crossCorr_pref_valid = []
     crossCorr_null_valid = []
 
@@ -631,8 +538,10 @@ def moreDSI():
     np.save('./work/dircection_corrCorr_Currents_pref_same',crossCorr_pref_same )
     np.save('./work/dircection_corrCorr_Currents_null_same',crossCorr_null_same )
 
-    return -1
-    t_wi = 51
+    print(np.shape(crossCorr_pref_same), np.shape(crossCorr_null_same))
+
+    
+    t_wi = 21#51
     t_total = len(gEx_pref_E1[0])
     lags = signal.correlation_lags(t_wi, t_wi)
 
@@ -647,14 +556,6 @@ def moreDSI():
     plt.close()
 
     idx_0 = np.where(lags == 0)[0]
-    plt.figure()
-    plt.scatter(crossCorr_pref_same[:,idx_0],dsi_kim[0], label='pref')
-    plt.scatter(crossCorr_null_same[:,idx_0],dsi_kim[0], label='null')
-    plt.legend()
-    plt.xlabel('Correlation gEx - gInh')
-    plt.ylabel('DSI')
-    plt.savefig('./Output/DSI_TC/hist_Correlation_scatter')
-    plt.close()
 
     crossCorr_argmax = np.argmax(crossCorr_pref_same,axis=1)    
     crossCorr_pref_maxT =(lags[crossCorr_argmax])
@@ -662,32 +563,6 @@ def moreDSI():
     crossCorr_argmax = np.argmax(crossCorr_null_same,axis=1)    
     crossCorr_nullmaxT = (lags[crossCorr_argmax])
 
-    plt.figure()
-    plt.scatter(crossCorr_pref_maxT,dsi_kim[0], label='pref')
-    plt.scatter(crossCorr_nullmaxT,dsi_kim[0], label='null')
-    plt.legend()
-    plt.xlabel(r'$\Delta$T')
-    plt.ylabel('DSI')
-    plt.savefig('./Output/DSI_TC/delta_T_dsi')
-    plt.close()
-
-
-
-    plt.figure(figsize=(12,6))
-    plt.subplot(1,3,1)
-    plt.scatter(crossCorr_pref_valid[:,0], crossCorr_null_valid[:,0],c=dsi_kim[0])
-    plt.xlabel('pref')
-    plt.ylabel('null')
-    plt.subplot(1,3,2)
-    plt.scatter(dsi_kim[0], crossCorr_pref_valid[:,0])
-    plt.xlabel('DSI')
-    plt.ylabel('pref')
-    plt.subplot(1,3,3)
-    plt.scatter(dsi_kim[0], crossCorr_null_valid[:,0])
-    plt.xlabel('DSI')
-    plt.ylabel('null')
-    plt.savefig('./Output/DSI_TC/crossCor_valid')
-    plt.close()
 
     plt.figure()
     plt.plot(lags,crossCorr_pref_same[0], label='pref') #[int(t_total/2)-t_wi:int(t_total/2)+t_wi-1]
@@ -700,7 +575,6 @@ def moreDSI():
     plt.figure()
     plt.plot(np.mean(crossCorr_pref_same,axis=0), label='pref')#[1400:1600]
     plt.plot(np.mean(crossCorr_null_same,axis=0), label='null')#[1400:1600]
-    plt.vlines(100,ymin=0.5,ymax=1.1)
     plt.legend()
     plt.savefig('./Output/DSI_TC/crossCorr_MeanALLC')
     plt.close()
@@ -778,8 +652,10 @@ def moreDSI():
     legend_elements = [Line2D([0], [0], color='steelblue', lw=4, label='pref'), 
                        Line2D([0], [0], color='tomato', lw=4, label='null')]
     axes[0].legend(handles=legend_elements)
-    axes[0].set_xticks(np.linspace(1,2*len(data_plot_pref), len(data_plot_pref)),['0-0.2','0.2-0.4','0.4-0.6','0.6-0.8','0.8-1.0'])
+    axes[0].set_xticks(np.linspace(1,2*len(data_plot_pref), len(data_plot_pref)))
+    axes[0].set_xticklabels(['0-0.2','0.2-0.4','0.4-0.6','0.6-0.8','0.8-1.0'])
     bar1 = axes[1].bar([0,1,2,3,4],data_plot_pref_len, alpha=0.4, color='gray')
+    axes[1].set_ylabel('Nbr Cells')
     plt.savefig('./Output/DSI_TC/violon_deltaT_bar',dpi=300,bbox_inches='tight')
     plt.close()
 
@@ -843,7 +719,7 @@ def moreDSI():
     plt.title('DSI 0.0 - 0.2')
     plt.plot(lags,np.mean(crossCorr_pref_low,axis=0), label='pref', linewidth=3) #[1400:1600]
     plt.plot(lags,np.mean(crossCorr_null_low,axis=0), label='null', linewidth=3) #[1400:1600]
-    plt.vlines(0,ymin=-0.2,ymax=0.7,linestyles = 'dashed', color='black')
+    plt.vlines(0,ymin=-0.2,ymax=1.1,linestyles = 'dashed', color='black')
     plt.legend()
     plt.ylabel('cross correlation', fontsize=13)
     plt.xlabel(r'$\Delta$T')
@@ -851,7 +727,7 @@ def moreDSI():
     plt.title('DSI 0.2 - 0.4')
     plt.plot(lags,np.mean(crossCorr_pref_mid_low,axis=0), label='pref', linewidth=3) #[1400:1600]
     plt.plot(lags,np.mean(crossCorr_null_mid_low,axis=0), label='null', linewidth=3) #[1400:1600]
-    plt.vlines(0,ymin=-0.2,ymax=0.7,linestyles = 'dashed', color='black')
+    plt.vlines(0,ymin=-0.2,ymax=1.1,linestyles = 'dashed', color='black')
     plt.legend()
     plt.xlabel(r'$\Delta$T')
     plt.yticks([],[])
@@ -859,7 +735,7 @@ def moreDSI():
     plt.title('DSI 0.4 - 0.6')
     plt.plot(lags,np.mean(crossCorr_pref_mid,axis=0), label='pref', linewidth=3) #[1400:1600]
     plt.plot(lags,np.mean(crossCorr_null_mid,axis=0), label='null', linewidth=3) #[1400:1600]
-    plt.vlines(0,ymin=-0.2,ymax=0.7,linestyles = 'dashed', color='black')
+    plt.vlines(0,ymin=-0.2,ymax=1.1,linestyles = 'dashed', color='black')
     plt.legend()
     plt.xlabel(r'$\Delta$T')
     plt.yticks([],[])
@@ -867,7 +743,7 @@ def moreDSI():
     plt.title('DSI 0.6 - 0.8')
     plt.plot(lags,np.mean(crossCorr_pref_mid_high,axis=0), label='pref', linewidth=3) #[1400:1600]
     plt.plot(lags,np.mean(crossCorr_null_mid_high,axis=0), label='null', linewidth=3) #[1400:1600]
-    plt.vlines(0,ymin=-0.2,ymax=0.7,linestyles = 'dashed', color='black')
+    plt.vlines(0,ymin=-0.2,ymax=1.1,linestyles = 'dashed', color='black')
     plt.legend()
     plt.xlabel(r'$\Delta$T')
     plt.yticks([],[])
@@ -875,104 +751,11 @@ def moreDSI():
     plt.title('DSI 0.8 - 1.0')
     plt.plot(lags,np.mean(crossCorr_pref_high,axis=0), label='pref', linewidth=3) #[1400:1600]
     plt.plot(lags,np.mean(crossCorr_null_high,axis=0), label='null', linewidth=3) #[1400:1600]
-    plt.vlines(0,ymin=-0.2,ymax=0.7,linestyles = 'dashed', color='black')
+    plt.vlines(0,ymin=-0.2,ymax=1.1,linestyles = 'dashed', color='black')
     plt.legend()
     plt.xlabel(r'$\Delta$T')
     plt.yticks([],[])
     plt.savefig('./Output/DSI_TC/crossCorr_Low_Mid_High',dpi=300, bbox_inches='tight')
-    plt.close()
-
-
-    plt.figure(figsize=(25,20))
-    for i in range(5):
-        plt.subplot(5,5,i+1)
-        plt.plot(lags,crossCorr_pref_low[i], label='pref')
-        plt.plot(lags,crossCorr_null_low[i], label='null')
-        plt.vlines(0,ymin=-1,ymax=1,linestyles = 'dashed', color='black')
-        plt.ylabel('low')
-    for i in range(5):
-        plt.subplot(5,5,5+i+1)
-        plt.plot(lags, crossCorr_pref_mid_low[i], label='pref')
-        plt.plot(lags, crossCorr_null_mid_low[i], label='null')
-        plt.vlines(0,ymin=-1,ymax=1,linestyles = 'dashed', color='black')
-        plt.ylabel('mid low')
-        plt.yticks([],[])
-    for i in range(5):
-        plt.subplot(5,5,10+i+1)
-        plt.plot(lags, crossCorr_pref_mid[i], label='pref')
-        plt.plot(lags, crossCorr_null_mid[i], label='null')
-        plt.vlines(0,ymin=-1,ymax=1,linestyles = 'dashed', color='black')
-        plt.ylabel('mid')
-        plt.yticks([],[])
-    for i in range(5):
-        plt.subplot(5,5,15+i+1)
-        plt.plot(lags, crossCorr_pref_mid_high[i], label='pref')
-        plt.plot(lags, crossCorr_null_mid_high[i], label='null')
-        plt.vlines(0,ymin=-1,ymax=1,linestyles = 'dashed', color='black')
-        plt.ylabel('mid high')
-        plt.yticks([],[])
-    for i in range(5):
-        plt.subplot(5,5,20+i+1)
-        plt.plot(lags, crossCorr_pref_high[i], label='pref')
-        plt.plot(lags, crossCorr_null_high[i], label='null')
-        plt.vlines(0,ymin=-1,ymax=1,linestyles = 'dashed', color='black')
-        plt.ylabel('high')
-        plt.yticks([],[])
-    plt.savefig('./Output/DSI_TC/crossCorr_Low_Mid_High_singleCells')
-    plt.close()
-    
-
-    sum_gEx_pref = np.mean(gEx_pref_E1,axis=1)
-    sum_gEx_null = np.mean(gEx_null_E1,axis=1)
-
-    sum_gIn_pref = np.mean(gIn_pref_E1,axis=1)
-    sum_gIn_null = np.mean(gIn_null_E1,axis=1)
-
-    print(np.shape(dsi_kim[0]), np.shape(sum_gEx_pref))
-
-    plt.figure(figsize=(10,10))
-    plt.subplot(2,2,1)
-    plt.scatter(sum_gEx_pref,dsi_kim[0])
-    plt.xlabel('Sum gEx pref')
-    plt.ylabel('DSI')
-    plt.ylim(0,1.1)
-    plt.xlim(0,60)
-    plt.subplot(2,2,2)
-    plt.scatter(sum_gEx_null,dsi_kim[0])
-    plt.xlabel('Sum gEx null')
-    plt.ylabel('DSI')
-    plt.ylim(0,1.1)
-    plt.xlim(0,60)
-    plt.subplot(2,2,3)
-    plt.scatter(sum_gIn_pref,dsi_kim[0])
-    plt.xlabel('Sum gIn pref')
-    plt.ylabel('DSI')
-    plt.ylim(0,1.1)
-    plt.xlim(0,60)
-    plt.subplot(2,2,4)
-    plt.scatter(sum_gIn_null,dsi_kim[0])
-    plt.xlabel('Sum gIn null')
-    plt.ylabel('DSI')
-    plt.savefig('./Output/DSI_TC/scatter_currents')
-    plt.close()
-
-
-    plt.figure(figsize=(10,12))
-    plt.subplot(3,1,1)
-    plt.scatter(np.mean(gEx_pref_E1 - gIn_pref_E1,axis=1), dsi_kim[0])
-    plt.ylabel('DSI')
-    plt.xlabel('gEx - gIn pref')
-    plt.subplot(3,1,2)
-    plt.scatter(np.mean(gEx_null_E1 - gIn_null_E1,axis=1), dsi_kim[0])
-    plt.ylabel('DSI')
-    plt.xlabel('gEx - gIn null')
-    plt.subplot(3,1,3)
-    plt.scatter(np.mean(gEx_null_E1 - gIn_null_E1,axis=1), np.mean(gEx_pref_E1 - gIn_pref_E1,axis=1),c=dsi_kim[0])
-    plt.ylabel('gEx - gIn pref')
-    plt.xlabel('gEx - gIn null')
-    plt.ylim(-18,0.5)
-    plt.xlim(-18,0.5)
-    plt.savefig('./Output/DSI_TC/scatter_currents_gEx_gInh')
     plt.close()
 
 
@@ -1128,6 +911,7 @@ def spikeDSI():
     spkC_times_E1, spkC_times_I1 = load_Time_Data() #np.load('./work/directGrating_Sinus_SpikeTimes_E1.npy')
     #spkC_times_I1 = np.load('./work/directGrating_Sinus_SpikeTimes_I1.npy')
 
+    ## ignore the first 120 ms, because the network needs some time to
     spkC_times_E1 = spkC_times_E1[:,:,:,:,:,:,120:]
     spkC_times_I1 = spkC_times_I1[:,:,:,:,:,:,120:]
 
@@ -1173,7 +957,6 @@ def spikeDSI():
 
     ##NOTE: Use the template match between the receptive fields -> change later to the pref. orientations
     temp = calcTM(rf_E1,rf_I1)
-    #temp = calcTM(w_E1,w_I1)
     np.save('./work/DSI_RF_tempE1_I1',temp)
     dsi_bins = np.linspace(0,1,6)
 
@@ -1227,8 +1010,6 @@ def spikeDSI():
     plt.savefig('./Output/DSI_TC/Spikes/testRF_tm',dpi=300, bbox_inches='tight')
     plt.close()
 
-
-
    
     max_prefD = preff_E1[:,2]
     step_degree = int(360/n_steps)
@@ -1238,7 +1019,7 @@ def spikeDSI():
 
 
     ## do not forget
-    #calcCrossE1(spkC_times_E1,spkC_times_I1, preff_E1, null_idx)
+    calcCrossE1(spkC_times_E1,spkC_times_I1, preff_E1, null_idx)
 
 
     cross_win = 100    
@@ -1840,9 +1621,9 @@ def analyzeCrossCorr():
 #-----------------------------------------------------------------------------
 if __name__=="__main__":
 
-    #main()
+    main()
     moreDSI()
-    #spikeDSI()
+    spikeDSI()
     #moreSpikesCorr()
     #analyzeCrossCorr()
     #moreSpikesCross()

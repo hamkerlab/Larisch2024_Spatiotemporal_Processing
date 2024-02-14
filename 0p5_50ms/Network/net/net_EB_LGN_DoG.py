@@ -244,7 +244,7 @@ def RGCtoLGN(prePop,postPop, s, c, stride):
     #weights = np.ones((filter_LGN,filter_LGN))*10
     #weights[1,1] *=3.0 # improve weights from the center RGC 
     weights = g*8.0
-    print(weights)
+
     weights = np.reshape(weights,filter_LGN*filter_LGN)
     for w_post in range(postPop.geometry[0]):
         for h_post in range(postPop.geometry[1]):

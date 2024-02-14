@@ -248,7 +248,7 @@ def plotData(name):
 
 def startAnalyze():
 
-    name_l = ['RGC','LGN','E1','IL1','E2','IL2'] 
+    name_l = ['RGC','LGN','E1','IL1'] 
 
     if not os.path.exists('Output/STRF/'):
         os.mkdir('Output/STRF/')
