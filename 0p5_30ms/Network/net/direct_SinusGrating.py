@@ -1,5 +1,5 @@
 from ANNarchy import *
-setup(dt=1.0)
+setup(dt=1.0,seed=101)
 import matplotlib as mp
 mp.use('Agg')
 import matplotlib.pyplot as plt
@@ -45,12 +45,6 @@ def createInput(degree,totalT,presentT,spat_speed,amplitude=0.3,s_f=1.12):
         img  = img[int(edge/2):int(edge/2)+s_input,int(edge/2):int(edge/2)+s_input]
         img_list[i] = img
 
-        #plt.figure()
-        #plt.imshow(img_list[i],cmap='gray',interpolation='none')
-        #plt.colorbar()
-        #plt.savefig('Output/direct_gratingSinus/inpt_d1_degree_%i_spatFreq_%i_sF_%f_%i'%(degree,spat_speed,s_f,i))
-        #plt.close()
-
     return(img_list)        
 
 def main():
@@ -70,7 +64,7 @@ def main():
     s_deg = 18 # 18 degree steps
     n_degrees = int(360/s_deg) # number of steps
 
-    amp_start= 0.11#0.08#0.06
+    amp_start= 0.11#0.16
     amplitude_step = 0.02#0.051
     n_amplitudes = 1
 
@@ -84,23 +78,24 @@ def main():
     mon_LGN = Monitor(popLGN,['spike'])
     mon_E1 = Monitor(popE1,['spike','vm','g_Exc','g_Inh'])
     mon_IL1 = Monitor(popIL1,['spike'])#,'vm','g_Exc','g_Inh'])
-    #mon_E2 = Monitor(popE2,['spike'])#,'vm','g_Exc','g_Inh'])
-    #mon_IL2 = Monitor(popIL2,['spike'])#,'vm','g_Exc','g_Inh'])
 
 
     rec_LGN = np.zeros((n_degrees,repeats,n_LGN))
 
     rec_E1 = np.zeros((n_degrees,repeats,n_E1))
+    rec_E1_spikes = np.zeros((n_degrees,repeats,n_E1, totalT))
     rec_membPotEx = np.zeros((n_degrees,repeats,totalT,n_E1))
     rec_gExcEx = np.zeros((n_degrees,repeats,totalT,n_E1))
     rec_gInhEx = np.zeros((n_degrees,repeats,totalT,n_E1))
 
+
     rec_IL1 = np.zeros((n_degrees,repeats,n_I1))
+    rec_I1_spikes = np.zeros((n_degrees,repeats,n_I1, totalT))
     rec_membPotIL1 = np.zeros((n_degrees,repeats,totalT,n_I1))
     rec_gExIL1 = np.zeros((n_degrees,repeats,totalT,n_I1))
     rec_gInIL1 = np.zeros((n_degrees,repeats,totalT,n_I1))
 
-
+   
     ### lagged LGN cells over syn-Delays
     # add some extra delays to implement "lagged" LGN-Cells -> additional delay depends on t_delay !
     projInput_LGN_ON.delay = np.load('./work/LGN_ON_delay.npy')
@@ -110,7 +105,6 @@ def main():
 
     
     sim_parameter = {"totalT": totalT, "presenT": presentT,"speed":spat_speed, "n_degree":n_degrees,"spatFreq":sf_steps}
-
     pbar = tqdm(total=(n_amplitudes*n_spatF*n_sf_steps*repeats*n_degrees))
 
     for a in range(n_amplitudes):
@@ -118,11 +112,11 @@ def main():
             for tF in range(n_sf_steps):
                 for r in range(repeats):
                     # choose randomly a degree
-                    np.random.shuffle(l_degrees)     
+                    np.random.shuffle(l_degrees)            
                     for d in l_degrees:
                 
                         # create a bar on a random degree
-                        inp_list = createInput(d,totalT,presentT,spat_speed[sf],amp_start+((a+1)*amplitude_step),sf_steps[tF])
+                        inp_list = createInput(d,totalT,presentT,spat_speed[sf],amp_start,sf_steps[tF])
                         n_ele = np.shape(inp_list)[0]             
                         for inp in range(n_ele):
                             popIMG.r = inp_list[inp]
@@ -131,12 +125,13 @@ def main():
                         spk_LGN = mon_LGN.get('spike')
                         spk_E1 = mon_E1.get('spike')
                         spk_I1 = mon_IL1.get('spike')
-                   
+                    
+
+
                         vmEx = mon_E1.get('vm')
                         gExcEx = mon_E1.get('g_Exc')
                         gInhEx = mon_E1.get('g_Inh')
                         
-         
 
                         for n in range(n_LGN):
                             spk = spk_LGN[n]
@@ -144,12 +139,16 @@ def main():
 
                         for n in range(n_E1):
                             spk = spk_E1[n]
+                            point_list = np.zeros(totalT)
+                            point_list[spk] = 1
+                            rec_E1_spikes[int(d//s_deg),r,n] = point_list
                             rec_E1[int(d//s_deg),r,n] = (len(spk)/totalT)*1000
-
-
 
                             if n < int(n_E1/4):
                                 spk = spk_I1[n]
+                                point_list = np.zeros(totalT)
+                                point_list[spk] = 1
+                                rec_I1_spikes[int(d//s_deg),r,n] = point_list
                                 rec_IL1[int(d//s_deg),r,n] = (len(spk)/totalT)*1000
 
 
@@ -157,14 +156,16 @@ def main():
                         rec_gExcEx[int(d//s_deg),r] = gExcEx#[0:totalT]
                         rec_gInhEx[int(d//s_deg),r] = gInhEx#[0:totalT]
 
-   
+             
                         reset()
                         pbar.update(1)
 
 
                 np.save('./work/directGrating_Sinus_SpikeCount_LGN_amp%i_spatF%i_tempF%i'%(a,sf,tF),rec_LGN, allow_pickle=False)
                 np.save('./work/directGrating_Sinus_SpikeCount_E1_amp%i_spatF%i_tempF%i'%(a,sf,tF),rec_E1, allow_pickle=False)
+                np.save('./work/directGrating_Sinus_SpikeTimes_E1_amp%i_spatF%i_tempF%i'%(a,sf,tF),rec_E1_spikes, allow_pickle=False)
                 np.save('./work/directGrating_Sinus_SpikeCount_I1_amp%i_spatF%i_tempF%i'%(a,sf,tF),rec_IL1, allow_pickle=False)
+                np.save('./work/directGrating_Sinus_SpikeTimes_I1_amp%i_spatF%i_tempF%i'%(a,sf,tF),rec_I1_spikes, allow_pickle=False)
 
                 np.save('./work/directGrating_Sinus_MembranPot_E1_amp%i_spatF%i_tempF%i'%(a,sf,tF),rec_membPotEx, allow_pickle=False)
                 np.save('./work/directGrating_Sinus_gExc_E1_amp%i_spatF%i_tempF%i'%(a,sf,tF),rec_gExcEx, allow_pickle=False)

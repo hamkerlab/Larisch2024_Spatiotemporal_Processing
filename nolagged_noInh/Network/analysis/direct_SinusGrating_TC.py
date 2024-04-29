@@ -1,55 +1,20 @@
 import matplotlib as mp
 mp.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 
+#import seaborn as sns
+#import pandas as pd
 import numpy as np
 import os
 import pickle
 from scipy import signal
+from tqdm import tqdm
+from load_data import *
 
 ###
 # Analyse DS, but use the preff. O from TC to determine preff D
 ###
-
-def load_Spk_Data():
-
-    sim_param = pickle.load( open( './work/directGrating_Sinus_parameter.p', "rb" ) )
-    print(sim_param)
-
-    lvl_speed = sim_param['speed']
-    lvl_spFrq = sim_param['spatFreq']
-
-
-    n_amp = 1
-    n_spatF = len(lvl_speed)
-    n_tempF = len(lvl_spFrq)
-
-    ## initialize LGN data
-    test_data = np.load('./work/directGrating_Sinus_SpikeCount_LGN_amp%i_spatF%i_tempF%i.npy'%(0,0,0)) # dummy data to get shapes 
-    n_degree, repeats, n_cells = np.shape(test_data)    
-    spkC_LGN_all = np.zeros((n_amp,n_spatF, n_tempF, n_degree, repeats, n_cells))
-
-    ## initialize E1 data
-    test_data = np.load('./work/directGrating_Sinus_SpikeCount_E1_amp%i_spatF%i_tempF%i.npy'%(0,0,0)) # dummy data to get shapes 
-    n_degree, repeats, n_cells = np.shape(test_data)    
-    spkC_E1_all = np.zeros((n_amp,n_spatF, n_tempF, n_degree, repeats, n_cells))
-
-    ## initialize I1 data
-    test_data = np.load('./work/directGrating_Sinus_SpikeCount_I1_amp%i_spatF%i_tempF%i.npy'%(0,0,0)) # dummy data to get shapes 
-    n_degree, repeats, n_cells = np.shape(test_data)    
-    spkC_I1_all = np.zeros((n_amp,n_spatF, n_tempF, n_degree, repeats, n_cells))
-
-
-    for a in range(n_amp):
-        for sf in range(n_spatF):
-            for tf in range(n_tempF):
-                spkC_LGN_all[a,sf,tf] = np.load('./work/directGrating_Sinus_SpikeCount_LGN_amp%i_spatF%i_tempF%i.npy'%(a,sf,tf))
-                spkC_E1_all[a,sf,tf] =  np.load('./work/directGrating_Sinus_SpikeCount_E1_amp%i_spatF%i_tempF%i.npy'%(a,sf,tf))
-                spkC_I1_all[a,sf,tf] =  np.load('./work/directGrating_Sinus_SpikeCount_I1_amp%i_spatF%i_tempF%i.npy'%(a,sf,tf))    
-
-    return(spkC_E1_all, spkC_I1_all,spkC_LGN_all)
 
 
 def main():
@@ -58,7 +23,9 @@ def main():
     if not os.path.exists('Output/DSI_TC/'):
         os.mkdir('Output/DSI_TC/')
 
-    spkC_E1_all, spkC_I1_all,spkC_LGN_all = load_Spk_Data()
+
+    spkC_E1_all, spkC_I1_all, spkC_LGN_all= load_Spk_Data()
+
 
     ### get preff O. 
     params_E1 = np.load('./work/TuningCurves_sinus_Exc_parameters.npy')
@@ -89,8 +56,6 @@ def main():
     rf_I1 = rf_I1[:,:,:,0] - rf_I1[:,:,:,1]
 
 
-    dsi_maz = np.zeros((n_contrast,n_cellsE1)) #DSI after Mazurek et al. (2014) // (R_pref - R_null)/(R_pref)
-    dsi_will = np.zeros((n_contrast,n_cellsE1))#DSI after Willson et al. (2018)// (R_pref - R_null)/(R_pref + R_null)
     dsi_kim = np.zeros((n_contrast,n_cellsE1))#DSI after Kim and Freeman (2016)// 1-(R_null/R_pref)
 
     preff_E1 = np.zeros((n_contrast,n_cellsE1,3)) # save the indices(!) of preffered speed[0], spatF[1], direction[2]
@@ -142,34 +107,140 @@ def main():
                 null_arg = np.copy(preff_arg)
                 preff_arg = preff_t
 
-            dsi_maz[i, c] = (spk_cell[preff_arg] - spk_cell[null_arg])/(spk_cell[preff_arg])
-            dsi_will[i,c] = (spk_cell[preff_arg] - spk_cell[null_arg])/(spk_cell[preff_arg] + spk_cell[null_arg] )
             dsi_kim[i,c] = 1 - (spk_cell[null_arg]/spk_cell[preff_arg])            
-
-        print(dsi_maz[i])
-        plt.figure()
-        plt.hist(dsi_maz[i])
-        plt.ylabel('# of cells')
-        plt.xlabel('DSI Mazurek')
-        plt.savefig('Output/DSI_TC/LVL_%i/Hist_dsi_maz.png'%(i))
-
-        plt.figure()
-        plt.hist(dsi_will[i])
-        plt.ylabel('# of cells')
-        plt.xlabel('DSI Willson')
-        plt.savefig('Output/DSI_TC/LVL_%i/Hist_dsi_will.png'%(i))
 
         plt.figure()
         plt.hist(dsi_kim[i])
         plt.ylabel('# of cells')
         plt.xlabel('DSI Kim')
         plt.savefig('Output/DSI_TC/LVL_%i/Hist_dsi_kim.png'%(i))
-                    
+        plt.close()                
 
     np.save('./work/dsi_kim_Cells_TC',dsi_kim,allow_pickle=False)
     np.save('./work/dsi_preff_E1_TC',preff_E1,allow_pickle=False)
 
 #------------------------------------------------------------------------------
+def calcCrossCorr(x,y,t_win):
+    # calculate the crosscorrelation for a specific time window
+    crossCorr = np.zeros(t_win*2+1)
+
+    c = 0
+    for i in range(t_win,0,-1): # first shifts
+        y_calc = y[i:]
+        x_calc = x[:len(y_calc)]
+        crossCorr[c] = np.corrcoef(x_calc,y_calc)[0,1]
+        c+=1
+
+    ## identic ##
+    crossCorr[c] = np.corrcoef(x,y)[0,1]
+    c+=1
+
+    ## for the next shifts
+    for i in range(1,t_win+1):
+        x_calc = x[i:] 
+        y_calc = y[:len(x_calc)]
+        crossCorr[c] = np.corrcoef(x_calc,y_calc)[0,1]
+        c+=1
+
+    return(crossCorr)
+
+
+def reject_outliers(data, m=3.):
+    d = np.abs(data - np.mean(data))
+    mdev = np.mean(d)
+    s = d/mdev if mdev else 0.
+    return data[s<m]
+
+
+def calcPSTH(data,deltaT):
+    ## calculate the peristimulus time histogram
+    repeats, n_steps = np.shape(data)
+    n_bins = int(n_steps//deltaT)
+    psth = np.zeros((repeats,n_bins))
+    for r in range(repeats):
+        spk_times = np.where(data[r] == 1)[0]
+        for b in range(n_bins):
+            idx = np.where((spk_times>=(0+deltaT*b) ) & (spk_times<(deltaT+deltaT*b) ))[0]
+            psth[r,b] = len(idx)
+    return(np.mean(psth,axis=0))
+
+
+def calcDiff(arr_1,arr_2):
+    n_1 = len(arr_1)
+    n_2 = len(arr_2)
+    diff = np.zeros((n_1,n_2))
+    for i in range(n_1):
+        diff[i,:] = np.abs(arr_1[i] - arr_2)
+    return(diff)  
+
+
+def calcCrossE1(spkC_times_E1, spkC_times_I1, preff_E1, null_idx):
+
+
+    n_E1 = np.shape(spkC_times_E1)[-2]
+    n_I1 = np.shape(spkC_times_I1)[-2]
+
+    max_t_pref_all = np.zeros((n_E1,n_I1))
+    max_t_null_all = np.zeros((n_E1,n_I1))
+    ### go through all pyr-cells and calculate the cross-correlation between the 
+    ## actual pyr-cell and all inhibitory cells for pref and null direction
+    
+    print('Calculate CrossCorrelation between spikes')
+    print('####################')
+
+    for cc in tqdm(range(n_E1),ncols=80): #n_E1
+
+        cell = cc
+
+        ### calculate the cross correlation between the actual pyramidial cell and all other inhibitory cells
+        ### for null direction
+        spk_times_c1 = spkC_times_E1[0,int(preff_E1[cell,0]),int(preff_E1[cell,1]),int(preff_E1[cell,2]),:,cell,:]
+        spk_times_inhib = spkC_times_I1[0,int(preff_E1[cell,0]),int(preff_E1[cell,1]),int(preff_E1[cell,2]),:,:,:]
+        cross_cor_all = []
+        correlate_cell_pref = np.zeros(len(spk_times_inhib[0]))
+        for c_i in range(len(spk_times_inhib[0])):
+            cross_cor = calcCrossCorr(spk_times_c1[0], spk_times_inhib[0,c_i],100)
+            cross_cor_all.append(cross_cor)
+            idx_st = np.where(spk_times_inhib[0,c_i] == 1)[0]
+            correlate_cell_pref[c_i] = np.corrcoef(spk_times_c1[0], spk_times_inhib[0,c_i])[0,1]
+
+
+
+        ### calculate the cross correlation between the actual pyramidial cell and all other inhibitory cells
+        ### for null direction
+        spk_null_c1 = spkC_times_E1[0,int(preff_E1[cell,0]),int(preff_E1[cell,1]),null_idx[cell],:,cell,:]
+        spk_null_inhib = spkC_times_I1[0,int(preff_E1[cell,0]),int(preff_E1[cell,1]),null_idx[cell],:,:,:]
+        cross_cor_all_null = []
+        correlate_cell_null = np.zeros(len(spk_times_inhib[0]))
+        for c_i in range(len(spk_null_inhib[0])):
+            cross_cor = calcCrossCorr(spk_null_c1[0], spk_null_inhib[0,c_i],100)
+            cross_cor_all_null.append(cross_cor)
+            idx_st = np.where(spk_null_inhib[0,c_i] == 1)[0]
+            correlate_cell_null[c_i] = np.corrcoef(spk_null_c1[0], spk_null_inhib[0,c_i])[0,1]
+
+        cross_cor_all = np.asarray(cross_cor_all)
+        cross_cor_all_null = np.asarray(cross_cor_all_null)
+
+        ### get the max delta_t 
+        t_steps = np.linspace(-99,99,200, dtype='int32')
+        
+        max_t_pref = np.argmax(cross_cor_all[:,1:-1],axis=1)
+        #print(max_t_pref)
+        max_t_pref = t_steps[max_t_pref]
+
+
+        max_t_null = np.argmax(cross_cor_all_null[:,1:-1],axis=1)
+        max_t_null = t_steps[max_t_null]
+
+
+        max_t_pref_all[cc] = max_t_pref
+        max_t_null_all[cc] = max_t_null
+
+
+    np.save('./work/DSI_spike_CrossCorr_pref_short',max_t_pref_all)
+    np.save('./work/DSI_spike_CrossCorr_null_short',max_t_null_all)
+
+#-----------------------------------------------------------------------------
 if __name__=="__main__":
 
     main()

@@ -261,7 +261,7 @@ def plotMeanTC(tuningCurves,tc_gExc,tc_gInh,contLVL,shift,sadeOSI,bwCalcFull,mat
     plt.plot(x,meanTC,'b-o',lw=5,ms=11)
     #plt.plot(x,meanTC+std/2,'r-')
     #plt.plot(x,meanTC-std/2,'r-')
-    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha='0.15')
+    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha= 0.15)
     #plt.plot(nbrAngl/2 - (meanBW[contLVL]/anglStep),meanTC[((nbrAngl-1)/2)- (meanBW[contLVL]/anglStep)],'gx')
     #ymax = meanTC[nbrAngl/2- (meanBW[contLVL]/anglStep)] /np.max(meanTC+std/2) 
     #plt.axvline(x =(nbrAngl/2-(meanBW[contLVL]/anglStep)),ymin=0.0,ymax=1.0,color='g', linestyle='--',lw=4) #=meanTC[nbrAngl/2- (meanBW[contLVL]/anglStep)] 
@@ -283,7 +283,7 @@ def plotMeanTC(tuningCurves,tc_gExc,tc_gInh,contLVL,shift,sadeOSI,bwCalcFull,mat
     length = len(meanTC)
     x = np.linspace(0,len(meanTC),len(meanTC))
     plt.plot(x,meanTC,'b-o',lw=5,ms=11)
-    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha='0.15')
+    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha= 0.15)
     plt.ylabel('gExc',fontsize=23,weight = 'bold')
     plt.xlabel('orientation [degrees]',fontsize=23,weight = 'bold')
     plt.xticks(np.linspace(0,len(meanTC),5),np.linspace(-180+shift,180+shift,5),fontsize=20)
@@ -299,7 +299,7 @@ def plotMeanTC(tuningCurves,tc_gExc,tc_gInh,contLVL,shift,sadeOSI,bwCalcFull,mat
     length = len(meanTC)
     x = np.linspace(0,len(meanTC),len(meanTC))
     plt.plot(x,meanTC,'b-o',lw=5,ms=11)
-    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha='0.15')
+    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha= 0.15)
     plt.ylabel('gInh',fontsize=23,weight = 'bold')
     plt.xlabel('orientation [degrees]',fontsize=23,weight = 'bold')
     plt.xticks(np.linspace(0,len(meanTC),5),np.linspace(-180+shift,180+shift,5),fontsize=20)
@@ -414,12 +414,20 @@ def startAnalyse_Sinus():
     print('Start analysis sinus gratings')
     #---- tuning curves over sinus gratings ---#
     tcExc = np.load('./work/TuningCurves_sinus_Exc.npy')
-    tcInh = np.load('./work/TuningCurves_sinus_Inh.npy')
+    #tcInh = np.load('./work/TuningCurves_sinus_Inh.npy')
     tCExcSinRelativ = np.load('./work/TuningCurvesRelativ_sinus_Exc.npy')
-    tCInhSinRelativ = np.load('./work/TuningCurvesRelativ_sinus_Inh.npy')
+    #tCInhSinRelativ = np.load('./work/TuningCurvesRelativ_sinus_Inh.npy')
     relaticTC_exc_gE = np.load('./work/TuningCurvesRelativ_sinus_Exc_gE.npy')
     relaticTC_exc_gI = np.load('./work/TuningCurvesRelativ_sinus_Exc_gI.npy')
     nbrCells,nbrPatches,nbrContrast = np.shape(tCExcSinRelativ)
+
+    params_Ex1 = np.load('./work/TuningCurves_sinus_Exc_parameters.npy')
+    print(np.shape(params_Ex1))
+    prefO_e1 =  params_Ex1[:,0,4]
+    plt.figure()
+    plt.hist(prefO_e1)
+    plt.savefig('./Output/TC_sinus/prefO_Hist.jpg',dip=300,bbox_inches='tight', pad_inches = 0.1)    
+    plt.close()
 
     halfA = int(nbrPatches/2)
 
@@ -439,7 +447,7 @@ def startAnalyse_Sinus():
 
         minAngle,maxAngle = [0.0,360.0]
         cv[:,i] = calcCVSinus(tcExc[:,:,i,:],minAngle,maxAngle)
-        cvI[:,i] = calcCVSinus(tcInh[:,:,i,:],minAngle,maxAngle)
+        #cvI[:,i] = calcCVSinus(tcInh[:,:,i,:],minAngle,maxAngle)
 
         minAngle,maxAngle = [-90.0,90.0]
         circVarExcFull[:,i] = calcCircularVarianceRingach(tCExcSinRelativ[:,:,i],minAngle,maxAngle)  
@@ -626,7 +634,7 @@ def startAnalyse_Sinus_pos():
     length = len(meanTC)
     x = np.linspace(0,len(meanTC),len(meanTC))
     plt.plot(x,meanTC,'b-o',lw=5,ms=11)
-    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha='0.15')
+    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha= 0.15)
     plt.ylabel('mean firing rate',fontsize=23,weight = 'bold')
     plt.xlabel('orientation [degrees]',fontsize=23,weight = 'bold')
     plt.xticks(np.linspace(0,len(meanTC),5),np.linspace(-180+shift,180+shift,5),fontsize=20)
@@ -643,7 +651,7 @@ def startAnalyse_Sinus_pos():
     length = len(meanTC)
     x = np.linspace(0,len(meanTC),len(meanTC))
     plt.plot(x,meanTC,'b-o',lw=5,ms=11)
-    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha='0.15')
+    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha= 0.15)
     plt.ylabel('gExc',fontsize=23,weight = 'bold')
     plt.xlabel('orientation [degrees]',fontsize=23,weight = 'bold')
     plt.xticks(np.linspace(0,len(meanTC),5),np.linspace(-180+shift,180+shift,5),fontsize=20)
@@ -659,7 +667,7 @@ def startAnalyse_Sinus_pos():
     length = len(meanTC)
     x = np.linspace(0,len(meanTC),len(meanTC))
     plt.plot(x,meanTC,'b-o',lw=5,ms=11)
-    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha='0.15')
+    plt.fill_between(x,meanTC+std,meanTC-std,color='red',alpha= 0.15)
     plt.ylabel('gInh',fontsize=23,weight = 'bold')
     plt.xlabel('orientation [degrees]',fontsize=23,weight = 'bold')
     plt.xticks(np.linspace(0,len(meanTC),5),np.linspace(-180+shift,180+shift,5),fontsize=20)

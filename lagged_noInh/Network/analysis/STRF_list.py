@@ -17,10 +17,14 @@ def calcStatistics():
     for c in range(n_cells):
         roll=False
         idx_max = np.where(np.abs(strf_list[c]) == np.max(np.abs(strf_list[c])))
-        max_t[c] = n_timepoints - idx_max[0]
+        if len(idx_max[0]) > 1:
+            max_t[c] = n_timepoints - idx_max[0][0]
+            curve = strf_list[c,:, idx_max[1][0]]
+        else:
+            max_t[c] = n_timepoints - idx_max[0]
+            curve = strf_list[c,:, idx_max[1]]
+            curve = curve[0]
 
-        curve = strf_list[c,:, idx_max[1]]
-        curve = curve[0]
         #curve = curve[2:]
         delta = [np.abs(curve[i+2] - curve[i]) for i in range(len(curve)-2)]
         end_t = np.where(delta > (np.mean(delta)+(0.5*np.mean(delta))) )[0]
@@ -54,9 +58,10 @@ def calcStatistics():
 
         if c == 3:
             plt.figure()
-            plt.plot(curve)
-            plt.plot(h_curve)
-            plt.plot(e_t)
+            plt.plot(curve, label='STRF curve')
+            plt.plot(h_curve, label='Hilbert curve')
+            plt.plot(e_t, label='Envelope curve')
+            plt.legend()
             plt.savefig('./Output/STRF/STRF_E1/curve_%i.png'%(c),bbox_inches='tight',dpi=300)
 
     mean_t = np.mean(max_t)

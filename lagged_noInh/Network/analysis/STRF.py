@@ -16,7 +16,7 @@ def setSubplotDimension(a):
     else :
         x = round(a)
         y = round(a)
-    return (x,y)   
+    return (int(x),int(y))   
 
 
 def fastSTA(sta_Input,sta_frExc):
@@ -129,7 +129,7 @@ def plot(list_STA, list_STRF, name):
     print(np.shape(list_STA))
     x,y = setSubplotDimension(np.sqrt(np.shape(list_STA)[0]))
     for i in range(np.shape(list_STA)[0]):
-        plt.subplot(int(x),int(y),i+1)
+        plt.subplot(x,y,i+1)
         plt.axis('off')
         im = plt.imshow(list_STA[i],cmap=mp.cm.Greys_r,aspect='auto',interpolation='none')#,vmin=wMin,vmax=wMax)
         #plt.axis('equal')
@@ -143,7 +143,7 @@ def plot(list_STA, list_STRF, name):
     minV = np.min(np.min(list_STRF,axis=1),axis=1)
     x,y = setSubplotDimension(np.sqrt(np.shape(list_STRF)[0]))
     for i in range(np.shape(list_STRF)[0]):
-        plt.subplot(int(x),int(y),i+1)
+        plt.subplot(x,y,i+1)
         plt.axis('off')
         im = plt.imshow(list_STRF[i],cmap=plt.get_cmap('gray',7),aspect='auto',interpolation='none',vmin=minV[i],vmax=maxV[i])
         #plt.axis('equal')
@@ -248,7 +248,7 @@ def plotData(name):
 
 def startAnalyze():
 
-    name_l = ['RGC','LGN','E1','IL1','E2','IL2'] 
+    name_l = ['RGC','LGN','E1','IL1'] 
 
     if not os.path.exists('Output/STRF/'):
         os.mkdir('Output/STRF/')
@@ -269,20 +269,12 @@ def startAnalyze():
 
 
     spk_E1 = np.load('./work/STRF_Spk_E1.npy',allow_pickle=True)    
-    calcSTRF(sta_Input,spk_E1,int(18*18),time_back,name_l[2]) # STRF for E1
+    calcSTRF(sta_Input,spk_E1,18*18,time_back,name_l[2]) # STRF for E1
     plotData(name_l[2])
+
     spk_IL1 = np.load('./work/STRF_Spk_I1.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_IL1,16,time_back,name_l[3]) # STRF for IL1
+    calcSTRF(sta_Input,spk_IL1,int(18*18/4),time_back,name_l[3]) # STRF for IL1
     plotData(name_l[3])
-
-
-    spk_E2 = np.load('./work/STRF_Spk_E2.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_E2,16,time_back,name_l[4]) # STRF for E2
-    plotData(name_l[4])
-
-    spk_IL2 = np.load('./work/STRF_Spk_I2.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_IL2,16,time_back,name_l[5]) # STRF for IL2
-    plotData(name_l[5])
 
 
 #------------------------------------------------------------------------------

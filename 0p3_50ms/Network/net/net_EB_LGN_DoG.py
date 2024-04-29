@@ -24,8 +24,7 @@ stride_LGN = 1
 n_LGN = h_LGN*h_LGN*2 # total number of all LGN neurons 
 n_E1 = h_LGN*h_LGN # number of neurons in Layer E1
 n_I1 = int(n_E1/4) # number of neurons on Layer I1
-n_E2 = n_E1        # number of neurons in Layer E2
-n_I2 = int(n_E2/4) # number of neurons in Layer I2
+
 
 
 h_RGC = filter_LGN+(h_LGN*stride_LGN -1 ) # first dimension of the complete (!) RGC population
@@ -178,8 +177,7 @@ popRGC = Population(geometry=(h_RGC,h_RGC,2),neuron=spkNeurRGC)
 popLGN = Population(geometry=(h_LGN,h_LGN,2),neuron=spkNeurLGN ) #  additional population to create the x-trace
 popE1 = Population(geometry=n_E1,neuron=spkNeurV1, name="E1")
 popIL1 = Population(geometry=n_I1, neuron = spkNeurV1, name="I1")
-popE2 = Population(geometry=n_E2,neuron=spkNeurV1, name="E2")
-popIL2 = Population(geometry=n_I2, neuron = spkNeurV1, name="I2")
+
 
 #---------------- DoG Custom Projection Definition ----------------------------#
     # create the connectivity pattern from input to RGC
@@ -246,7 +244,7 @@ def RGCtoLGN(prePop,postPop, s, c, stride):
     #weights = np.ones((filter_LGN,filter_LGN))*10
     #weights[1,1] *=3.0 # improve weights from the center RGC 
     weights = g*8.0
-    print(weights)
+
     weights = np.reshape(weights,filter_LGN*filter_LGN)
     for w_post in range(postPop.geometry[0]):
         for h_post in range(postPop.geometry[1]):
@@ -363,62 +361,7 @@ projInhib_Lat = Projection(
     synapse = inputSynapse
 ).connect_all_to_all(weights = Uniform(0.0,1.0))#, delays = Uniform(1.0, 2) )
 
-## Projections into V1 L2/3
 
-#excitatory
-projE1_E2 = Projection(
-    pre = popE1,
-    post = popE2,
-    target = 'Exc',
-    synapse = inputSynapse
-).connect_all_to_all(weights = Uniform(0.0,1.0))
-
-projE1_IL2 = Projection(
-    pre = popE1,
-    post = popIL2,
-    target = 'Exc',
-    synapse = inputSynapse
-).connect_all_to_all(weights = Uniform(0.0,1.0))
-
-projE2_IL2 = Projection(
-    pre = popE2,
-    post = popIL2,
-    target = 'Exc',
-    synapse = inputSynapse
-).connect_all_to_all(weights = Uniform(0.0,1.0))
-
-#inhibitory
-
-projIL1_E2 = Projection(
-    pre = popIL1,
-    post= popE2,
-    target = 'Inh',
-    synapse = inputSynapse
-).connect_all_to_all(weights = Uniform(0.0,1.0))
-
-
-projIL1_IL2 = Projection(
-    pre = popIL1,
-    post= popIL2,
-    target = 'Inh',
-    synapse = inputSynapse
-).connect_all_to_all(weights = Uniform(0.0,1.0))
-
-
-projIL2_E2 = Projection(
-    pre = popIL2,
-    post= popE2,
-    target = 'Inh',
-    synapse = inputSynapse
-).connect_all_to_all(weights = Uniform(0.0,1.0))
-
-
-projIL2_Lat = Projection(
-    pre = popIL2,
-    post= popIL2,
-    target = 'Inh',
-    synapse = inputSynapse
-).connect_all_to_all(weights = Uniform(0.0,1.0))
 
 def loadWeights():
     projLGN_V1.w = np.loadtxt('Input_network/V1weight.txt')
@@ -427,10 +370,3 @@ def loadWeights():
     projInhib_V1.w = np.loadtxt('Input_network/INtoV1.txt')#*0.0
     projInhib_Lat.w = np.loadtxt('Input_network/INLat.txt')#*0.0
 
-    projIL1_E2.w  = np.loadtxt('Input_network/IN1_V2.txt')#*0.0
-    projIL1_IL2.w = np.loadtxt('Input_network/IN1_IN2.txt')#*0.0
-    projE1_E2.w   = np.loadtxt('Input_network/V2weight.txt')
-    projE2_IL2.w  = np.loadtxt('Input_network/V2toIN2.txt')
-    projE1_IL2.w  = np.loadtxt('Input_network/V1toIN2.txt')
-    projIL2_E2.w  = np.loadtxt('Input_network/IN2toV2.txt')#*0.0
-    projIL2_Lat.w = np.loadtxt('Input_network/IN2Lat.txt')#*0.0

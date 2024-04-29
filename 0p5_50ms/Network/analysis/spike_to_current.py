@@ -603,7 +603,7 @@ def analyze():
         plot_data = max_crossCalc_null_low[~np.isnan(max_crossCalc_null_low[:,b]),b]
         ax[1,1].boxplot(plot_data, positions= [b+1], patch_artist=True, boxprops=dict(facecolor='tomato'), widths=0.45,medianprops=dict(color='black', linewidth=2.0))
     #ax[1,1].boxplot(plot_data, patch_artist=True)
-    ax[1,1].set_xticks(np.linspace(1,tm_bins-1,tm_bins-1), tm_labels)
+    #ax[1,1].set_xticks(np.linspace(1,tm_bins-1,tm_bins-1), tm_labels)
     ax[1,1].hlines(0,0,bins_tm+1,colors='gray', linestyles='dashed' )
     ax[1,1].text(4.0,t_win-4,'DSI < 0.2 \n null', bbox=dict(boxstyle='round', facecolor='white'))
     #ax[1,1].set_title('null low')
@@ -643,7 +643,7 @@ def analyze():
     for b in range(bins_tm):
         plot_data = tm_nSpk_null_all_low_oR_sumTB[:,b]
         ax[1,1].boxplot(plot_data, positions= [b+1], patch_artist=True, boxprops=dict(facecolor='tomato'), widths=0.45,medianprops=dict(color='black', linewidth=2.0))
-    ax[1,1].set_xticks(np.linspace(1,tm_bins-1,tm_bins-1), tm_labels)
+    #ax[1,1].set_xticks(np.linspace(1,tm_bins-1,tm_bins-1), tm_labels)
     #ax[1,1].hlines(0,0,bins_tm+1,colors='gray', linestyles='dashed' )
     ax[1,1].text(4.0,7.9,'DSI < 0.2 \n null', bbox=dict(boxstyle='round', facecolor='white'))
     ax[1,1].set_xlabel(r'cos')
@@ -659,13 +659,13 @@ def analyze():
         ax[b,0].plot(np.nanmean(crossCalc_null_high[:,b],axis=0))
         #ax[b,0].vlines(t_win, -1,1, linestyles='dashed', colors="gray")
         #ax[b,0].hlines(0, 0,2*t_win, linestyles='dashed', colors="gray")
-        ax[b,0].set_xticks(np.linspace(0,2*t_win-1,5), np.linspace(-t_win,t_win,5))
+        #ax[b,0].set_xticks(np.linspace(0,2*t_win-1,5), np.linspace(-t_win,t_win,5))
 
         ax[b,1].plot(np.nanmean(crossCalc_pref_low[:,b],axis=0))
         ax[b,1].plot(np.nanmean(crossCalc_null_low[:,b],axis=0))
         #ax[b,1].vlines(t_win, -1,1, linestyles='dashed', colors="gray")
         #ax[b,1].hlines(0, 0,2*t_win, linestyles='dashed', colors="gray")
-        ax[b,1].set_xticks(np.linspace(0,2*t_win-1,5), np.linspace(-t_win,t_win,5))
+        #ax[b,1].set_xticks(np.linspace(0,2*t_win-1,5), np.linspace(-t_win,t_win,5))
 
     plt.savefig('Output/DSI_TC/Spike_to_Curr/Cross_Corr_gEx_Inh_templateWise')
 
@@ -693,52 +693,6 @@ def analyze():
     plt.legend()
     plt.xticks(np.linspace(0,2*t_win,5), np.linspace(-t_win,t_win,5) )
     plt.savefig('Output/DSI_TC/Spike_to_Curr/meanCrossCorr_overTM')    
-
-    ## just to get sure
-    cross_gE_gI_pref_high = np.zeros((n_cells_high,2*t_win+1 ))
-    cross_gE_gI_null_high = np.zeros((n_cells_high,2*t_win+1 ))
-    cross_gE_gI_pref_low = np.zeros((n_cells_low,2*t_win+1 ))
-    cross_gE_gI_null_low = np.zeros((n_cells_low,2*t_win+1 ))
-    cross_pref_test = np.zeros((n_cells_high,2*t_win+1 ))
-    cross_null_test = np.zeros((n_cells_high,2*t_win+1 ))
-    for c in range(n_cells_high):
-        cross_gE_gI_pref_high[c] = calcCrossCorr(gExc_bin_pref_high_oR[c]/np.max(gExc_bin_pref_high_oR[c]) , gInh_bin_pref_high_oR[c]/np.max(gInh_bin_pref_high_oR[c]) , t_win) 
-        cross_gE_gI_null_high[c] = calcCrossCorr(gExc_bin_null_high_oR[c]/np.max(gExc_bin_null_high_oR[c]) , gInh_bin_null_high_oR[c]/np.max(gInh_bin_null_high_oR[c]), t_win)
-
-        cross_gE_gI_pref_low[c] = calcCrossCorr(gExc_bin_pref_low_oR[c]/np.max(gExc_bin_pref_low_oR[c]) , gInh_bin_pref_low_oR[c]/np.max(gInh_bin_pref_low_oR[c]), t_win) 
-        cross_gE_gI_null_low[c] = calcCrossCorr(gExc_bin_null_low_oR[c]/np.max(gExc_bin_null_low_oR[c]) , gInh_bin_null_low_oR[c]/np.max(gInh_bin_null_low_oR[c]), t_win)
-
-        #print(cross_gE_gI_pref_high[c])
-        corr = np.correlate(gExc_bin_pref_high_oR[c]/np.max(gExc_bin_pref_high_oR[c]),gInh_bin_pref_high_oR[c]/np.max(gInh_bin_pref_high_oR[c]), 'full' )
-        l = int(len(corr)/2)
-        cross_pref_test[c] = corr[l-t_win:l+t_win+1]
-
-        corr = np.correlate(gExc_bin_null_high_oR[c]/np.max(gExc_bin_null_high_oR[c]),gInh_bin_null_high_oR[c]/np.max(gInh_bin_null_high_oR[c]), 'full' )
-        l = int(len(corr)/2)
-        cross_null_test[c] = corr[l-t_win:l+t_win+1]
-
-    plt.figure()
-    plt.plot(np.mean(cross_pref_test,axis=0))
-    plt.plot(np.mean(cross_null_test,axis=0))
-    plt.savefig('Output/test_cross_plot')
-
-    plt.figure()
-    plt.subplot(121)
-    plt.plot(np.mean(cross_gE_gI_pref_high,axis=0), label='pref')
-    plt.plot(np.mean(cross_gE_gI_null_high,axis=0), label='null')
-    plt.vlines(t_win, -1,1, linestyles='dashed', colors="gray")
-    plt.hlines(0, 0,2*t_win, linestyles='dashed', colors="gray")
-    plt.legend()
-    plt.xticks(np.linspace(0,2*t_win,5), np.linspace(-t_win,t_win,5) )
-    plt.subplot(122)
-    plt.plot(np.mean(cross_gE_gI_pref_low,axis=0), label='pref')
-    plt.plot(np.mean(cross_gE_gI_null_low,axis=0), label='null')
-    plt.vlines(t_win, -0.5,.5, linestyles='dashed', colors="gray")
-    plt.hlines(0, 0,2*t_win, linestyles='dashed', colors="gray")
-    plt.legend()
-    plt.xticks(np.linspace(0,2*t_win,5), np.linspace(-t_win,t_win,5) )
-    plt.savefig('Output/DSI_TC/Spike_to_Curr/Cross_Corr_gEx_Inh_test')    
-
 
 
 if __name__ == '__main__':

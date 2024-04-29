@@ -16,7 +16,7 @@ def setSubplotDimension(a):
     else :
         x = round(a)
         y = round(a)
-    return (x,y)   
+    return (int(x),int(y))   
 
 
 def fastSTA(sta_Input,sta_frExc):
@@ -248,7 +248,7 @@ def plotData(name):
 
 def startAnalyze():
 
-    name_l = ['RGC','LGN','E1','IL1','E2','IL2'] 
+    name_l = ['RGC','LGN','E1','IL1'] 
 
     if not os.path.exists('Output/STRF/'):
         os.mkdir('Output/STRF/')
@@ -271,18 +271,10 @@ def startAnalyze():
     spk_E1 = np.load('./work/STRF_Spk_E1.npy',allow_pickle=True)    
     calcSTRF(sta_Input,spk_E1,18*18,time_back,name_l[2]) # STRF for E1
     plotData(name_l[2])
+
     spk_IL1 = np.load('./work/STRF_Spk_I1.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_IL1,16,time_back,name_l[3]) # STRF for IL1
+    calcSTRF(sta_Input,spk_IL1,int(18*18/4),time_back,name_l[3]) # STRF for IL1
     plotData(name_l[3])
-
-
-    spk_E2 = np.load('./work/STRF_Spk_E2.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_E2,16,time_back,name_l[4]) # STRF for E2
-    plotData(name_l[4])
-
-    spk_IL2 = np.load('./work/STRF_Spk_I2.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_IL2,16,time_back,name_l[5]) # STRF for IL2
-    plotData(name_l[5])
 
 
 #------------------------------------------------------------------------------

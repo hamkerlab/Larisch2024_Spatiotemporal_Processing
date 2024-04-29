@@ -12,8 +12,8 @@ def checkBounds(parameters, x_dim):
 
     parameters[0] = np.clip(parameters[0],5,40)
     parameters[1] = np.clip(parameters[1],0,15)
-    parameters[2] = np.clip(parameters[2],1,40)
-    parameters[3] = np.clip(parameters[3],0,10)
+    parameters[2] = np.clip(parameters[2],5,35)
+    parameters[3] = np.clip(parameters[3],0.1,3)
     parameters[4] = np.clip(parameters[4],-100,250)#,10, 350)
 
     return(parameters)
@@ -92,7 +92,7 @@ def fitt1D_Gabor(curve, send_end):
                 def errfunc(fittParameters):
                     return (get1DGabor(fittParameters, x_dim) - data)**2
 
-                results = least_squares(errfunc,fittParameters, method = 'dogbox')
+                results = least_squares(errfunc,fittParameters, method = 'trf')
                 params = results['x']
                 new_error = np.sqrt(np.mean((get1DGabor(params,x_dim) - data)**2))
 

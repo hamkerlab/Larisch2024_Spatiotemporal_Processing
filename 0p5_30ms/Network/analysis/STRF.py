@@ -3,7 +3,6 @@ mp.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-from tqdm import tqdm
 
 def setSubplotDimension(a):
     x = 0
@@ -17,7 +16,7 @@ def setSubplotDimension(a):
     else :
         x = round(a)
         y = round(a)
-    return (x,y)   
+    return (int(x),int(y))   
 
 
 def fastSTA(sta_Input,sta_frExc):
@@ -73,7 +72,7 @@ def calcSTRF(sta_Input, spk_pop, n_cells, time_back, name):
     #inp_bin = np.reshape(inp_bin,(n_stim*duration,s_X,s_Y))
     list_input = []
 
-    for i in tqdm(range(n_cells),ncols=80):
+    for i in range(n_cells):
         print('Cell Nr.%i'%(i))
         event_w = np.zeros((time_back,s_X,s_Y)) # summed input for the STRF
 
@@ -86,7 +85,7 @@ def calcSTRF(sta_Input, spk_pop, n_cells, time_back, name):
             stim_start = s_t // duration  # index of stimulus where spike occured
             stim_before = (s_t-time_back) // duration # index of stimulus n ms before spike
             #print(stim_before,stim_start)
-            stim_list = np.linspace(stim_before,stim_start,(stim_start-stim_before)+1,dtype='int32') #sta_Input[stim_before:stim_start+1]
+            stim_list = np.linspace(stim_before,stim_start,(stim_start-stim_before)+1,dtype='int64') #sta_Input[stim_before:stim_start+1]
             #print(len(stim_list))
             # difference from start from spike stim
             diff_start = s_t - (stim_list[-1]*duration) +1
@@ -153,22 +152,6 @@ def plot(list_STA, list_STRF, name):
     fig.savefig('./Output/STRF/STRF_'+name+'/STRF_NOISE_Test.jpg',bbox_inches='tight', pad_inches = 0.1,dpi=300)
 
     
-
-    fig = plt.figure(figsize=(8,8))
-    print(np.shape(list_STRF))
-    maxV = np.max(np.max(list_STRF,axis=1),axis=1)
-    minV = np.min(np.min(list_STRF,axis=1),axis=1)
-    x,y = setSubplotDimension(np.sqrt(np.shape(list_STRF)[0]))
-    for i in range(np.shape(list_STRF)[0]):
-        plt.subplot(x,y,i+1)
-        plt.axis('off')
-        im = plt.imshow(list_STRF[i],cmap=plt.get_cmap('gray',7),aspect='auto',interpolation='none',vmin=minV[i],vmax=maxV[i])
-        #plt.axis('equal')
-    #plt.axis('equal')
-    plt.subplots_adjust(hspace=0.25,wspace=0.25)
-    fig.savefig('./Output/STRF/STRF_'+name+'/STRF_NOISE_Test_norm.jpg',bbox_inches='tight', pad_inches = 0.1,dpi=300)
-
-
 def plotData(name):
 
     if not os.path.exists('Output/STRF/STRF_'+name+'/'):
@@ -187,8 +170,6 @@ def plotData(name):
     list_STA = []
     list_STRF = []
     for i in range(n_cells):
-        list_input[i] = list_input[i] - np.mean(list_input[i])
-        list_input[i] = list_input[i]/np.max(np.abs(list_input[i]))
         list_STA.append(np.sum(list_input[i],axis=0))
         list_STRF.append(np.sum(list_input[i],axis=2))
 
@@ -211,15 +192,13 @@ def plotData(name):
         plotLinesOFF= plotLinesOFF[::-1]
 
         plt.figure()
-        #plt.plot(plotLinesON/np.max(np.abs(plotLinesON)),'--',color='steelblue')
-        plt.plot(plotLinesON,'--',color='steelblue')
+        plt.plot(plotLinesON/np.max(np.abs(plotLinesON)),'--',color='steelblue')
         #plt.hlines(0,xmin=0,xmax=n_time)
-        #plt.plot(plotLinesOFF/np.max(np.abs(plotLinesOFF)),'--',color='tomato')
-        plt.plot(plotLinesOFF,'--',color='tomato')
+        plt.plot(plotLinesOFF/np.max(np.abs(plotLinesOFF)),'--',color='tomato')
         plt.xlabel('time [ms]')
         plt.ylabel('normalized amplitude')
         #plt.xticks(np.linspace(0,len(l_ON_STRF[i]),7),np.linspace(300,0,7))
-        plt.hlines(np.mean((np.mean(plotLinesOFF),np.mean(plotLinesON))),0,300,'gray','--')
+        plt.hlines(0,0,300,'gray','--')
         plt.savefig('./Output/STRF/STRF_'+name+'/STRF_Noise_TimeS_'+str(i))
         plt.close()
 
@@ -269,7 +248,7 @@ def plotData(name):
 
 def startAnalyze():
 
-    name_l = ['RGC','LGN','E1','IL1','E2','IL2'] 
+    name_l = ['RGC','LGN','E1','IL1'] 
 
     if not os.path.exists('Output/STRF/'):
         os.mkdir('Output/STRF/')
@@ -279,34 +258,23 @@ def startAnalyze():
 
     time_back = 300 #ms time to look back
 
-    #spk_RGC = np.load('./work/STRF_Spk_RGC.npy',allow_pickle=True)
-    #calcSTRF(sta_Input,spk_RGC,49,time_back,name_l[0]) # STRF for RGC
-    #plotData(name_l[0])
+    spk_RGC = np.load('./work/STRF_Spk_RGC.npy',allow_pickle=True)
+    calcSTRF(sta_Input,spk_RGC,16,time_back,name_l[0]) # STRF for RGC
+    plotData(name_l[0])
 
 
-    #spk_LGN = np.load('./work/STRF_Spk_LGN.npy',allow_pickle=True)
-    #calcSTRF(sta_Input,spk_LGN,49,time_back,name_l[1]) # STRF for LGN
-    #plotData(name_l[1])
+    spk_LGN = np.load('./work/STRF_Spk_LGN.npy',allow_pickle=True)
+    calcSTRF(sta_Input,spk_LGN,16,time_back,name_l[1]) # STRF for LGN
+    plotData(name_l[1])
 
 
     spk_E1 = np.load('./work/STRF_Spk_E1.npy',allow_pickle=True)    
     calcSTRF(sta_Input,spk_E1,18*18,time_back,name_l[2]) # STRF for E1
     plotData(name_l[2])
 
-    return -1
-
     spk_IL1 = np.load('./work/STRF_Spk_I1.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_IL1,49,time_back,name_l[3]) # STRF for IL1
+    calcSTRF(sta_Input,spk_IL1,int(18*18/4),time_back,name_l[3]) # STRF for IL1
     plotData(name_l[3])
-
-
-    spk_E2 = np.load('./work/STRF_Spk_E2.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_E2,49,time_back,name_l[4]) # STRF for E2
-    plotData(name_l[4])
-
-    spk_IL2 = np.load('./work/STRF_Spk_I2.npy',allow_pickle=True)
-    calcSTRF(sta_Input,spk_IL2,49,time_back,name_l[5]) # STRF for IL2
-    plotData(name_l[5])
 
 
 #------------------------------------------------------------------------------
