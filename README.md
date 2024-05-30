@@ -15,8 +15,8 @@ Repository containing the relevant python scripts for the Larisch, R. and Hamker
 The different directories contain the evaluation scripts to the different model variants.
 They differ as follow
 
-|    Directory            | with RGC surround delay | $\%$ lagged cells | $ms$ of lag | inhibition | notes
-|-------------------------|-------------------------|-------------------|-------------|------------|:-------------------------------------------------------:|
+|    Directory            | with RGC surround delay |    % lagged cells | $ms$ of lag | inhibition | notes
+|-------------------------|:-----------------------:|:-----------------:|:-----------:|:----------:|:-------------------------------------------------------:|
 | *0p3_50ms*              |           Yes           |         30        |     50      |    Yes     |                                                         |
 | *0p5_30ms*              |           Yes           |         50        |     30      |    Yes     |                                                         |
 | *0p5_50ms*              |           Yes           |         50        |     50      |    Yes     |                                                         |
