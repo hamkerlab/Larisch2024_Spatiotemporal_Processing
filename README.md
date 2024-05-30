@@ -15,20 +15,20 @@ Repository containing the relevant python scripts for the Larisch, R. and Hamker
 The different directories contain the evaluation scripts to the different model variants.
 They differ as follow
 
-    Directory           | with RGC surround delay | $\%$ lagged cells | $ms$ of lag | inhibition | notes
-------------------------|-------------------------|-------------------|-------------|------------|---------------------------------------------------------
-*0p3_50ms*              |           Yes           |         30        |     50      |    Yes     |
-*0p5_30ms*              |           Yes           |         50        |     30      |    Yes     |   
-*0p5_50ms*              |           Yes           |         50        |     50      |    Yes     |
-*0p5_70ms*              |           Yes           |         50        |     70      |    Yes     |
-*0p7_50ms*              |           Yes           |         70        |     50      |    Yes     |
-*lagged_noInh*          |           Yes           |         50        |     50      |    No      |
-*nolagged_Inh*          |           Yes           |         0         |     -       |    Yes     |
-*nolagged_noInh*        |           Yes           |         0         |     -       |    No      |
-*no_STRF*               |           No            |         -         |     -       |    Yes     |
-*shuffle_FBInhib*       |           Yes           |         50        |     50      |    Yes     | Shuffle all weights, related to feedback inhibition
-*shuffle_FWInhib*       |           Yes           |         50        |     50      |    Yes     | Shuffle all weights, related to feedforward inhibition
-*shuffleInhib_complete* |           Yes           |         50        |     50      |    Yes     | Shuffle all weights, related to inhibition
+|    Directory            | with RGC surround delay | $\%$ lagged cells | $ms$ of lag | inhibition | notes
+|-------------------------|-------------------------|-------------------|-------------|------------|:-------------------------------------------------------:|
+| *0p3_50ms*              |           Yes           |         30        |     50      |    Yes     |                                                         |
+| *0p5_30ms*              |           Yes           |         50        |     30      |    Yes     |                                                         |
+| *0p5_50ms*              |           Yes           |         50        |     50      |    Yes     |                                                         |
+| *0p5_70ms*              |           Yes           |         50        |     70      |    Yes     |                                                         |   
+| *0p7_50ms*              |           Yes           |         70        |     50      |    Yes     |                                                         |
+| *lagged_noInh*          |           Yes           |         50        |     50      |    No      |                                                         |       
+| *nolagged_Inh*          |           Yes           |         0         |     -       |    Yes     |                                                         |       
+| *nolagged_noInh*        |           Yes           |         0         |     -       |    No      |                                                         |
+| *no_STRF*               |           No            |         -         |     -       |    Yes     |                                                         |
+| *shuffle_FBInhib*       |           Yes           |         50        |     50      |    Yes     | Shuffle all weights, related to feedback inhibition     |
+| *shuffle_FWInhib*       |           Yes           |         50        |     50      |    Yes     | Shuffle all weights, related to feedforward inhibition  |
+| *shuffleInhib_complete* |           Yes           |         50        |     50      |    Yes     | Shuffle all weights, related to inhibition              | 
 
 ## Script order to obtain results
 
