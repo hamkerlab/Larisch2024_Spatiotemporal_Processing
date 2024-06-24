@@ -39,6 +39,9 @@ def startAnalye2d():
 
     for i in tqdm(range(n_cells),ncols=80):
 
+        if not os.path.exists('Output/STRF/FFT_2D/cell_%i'%(i)):
+                os.mkdir('Output/STRF/FFT_2D/cell_%i'%(i))
+
         c1 = strf_list[i]
         fft_img = np.fft.fft2(c1)/len(c1.flatten())
         fft_img = np.fft.fftshift(fft_img)
@@ -49,6 +52,22 @@ def startAnalye2d():
         x_c = int(x_dim/2)
         t_c = int(t_dim/2)
 
+        plt.figure(figsize=(4,7))
+        plt.subplot(2,1,1)
+        plt.imshow(c1[50:], cmap=plt.get_cmap('RdBu',7),aspect='auto', vmin=-np.max(np.abs(c1)), vmax= np.max(np.abs(c1)))
+        plt.xlabel('x [px]',fontsize='12')
+        plt.ylabel('t [ms]',fontsize='12')
+        plt.yticks(np.linspace(0,200,5), np.linspace(250,50,5))
+        plt.subplot(2,1,2)
+        plt.imshow(ampl_spec[t_c-15:t_c+15+1, x_c-15:x_c+15+1],aspect='auto')
+        plt.yticks(np.linspace(0,30,5),np.linspace(-15,15,5))
+        plt.xticks(np.linspace(0,30,5),np.linspace(-15,15,5))
+        plt.axvline(15,color='gray')
+        plt.axhline(15, color='gray')
+        plt.ylabel('Temporal frequency [Hz]', fontsize='12')
+        plt.xlabel('Spatial frequency [Cycles/Img]', fontsize='12')
+        plt.savefig('Output/STRF/FFT_2D/cell_%i/Ampl_Spec_zoom_2'%i,bbox_inches='tight',dpi=300 )
+        plt.close()
 
         # take only one half (two parts of TF and one SF)
         half_q = ampl_spec[:,:x_c]
@@ -75,6 +94,7 @@ def startAnalye2d():
         #mse_list[i] = np.sqrt(np.mean((half_q[t_c-z:t_c+1,idx_x[0]] - np.flip(half_q[t_c:t_c+z+1,idx_x[0]]))**2))
         mse_list[i] = np.sqrt(np.mean((q1 - np.flip(q2,axis=0))**2))
         
+
     np.save('./work/rmseFFT2D',mse_list)
     np.save('./work/ampDiffFFT2D',ampl_list)
     np.save('./work/ampDiffFFT2D_Norm', amplNorm_list)

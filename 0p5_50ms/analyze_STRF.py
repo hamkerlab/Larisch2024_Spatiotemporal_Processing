@@ -27,5 +27,9 @@ def analyzeSTRF(lagged_LGN = True):
     ## create a gif for the STRFs
     os.system('python Network/analysis/createSTRF_movie.py')
 
+    ## FFT analysis
+    os.system('python Network/analysis/STRF_FFT.py')
+
+
 if __name__ == "__main__":
     analyzeSTRF()

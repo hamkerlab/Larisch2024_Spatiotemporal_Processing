@@ -20,12 +20,12 @@ They differ as follow
 | *0p3_50ms*              |           Yes           |         30        |     50      |    Yes     |                                                         |
 | *0p5_30ms*              |           Yes           |         50        |     30      |    Yes     |                                                         |
 | *0p5_50ms*              |           Yes           |         50        |     50      |    Yes     |                                                         |
-| *0p5_70ms*              |           Yes           |         50        |     70      |    Yes     |                                                         |   
+| *0p5_70ms*              |           Yes           |         50        |     70      |    Yes     |                                                         |
 | *0p7_50ms*              |           Yes           |         70        |     50      |    Yes     |                                                         |
-| *lagged_noInh*          |           Yes           |         50        |     50      |    No      |                                                         |       
-| *nolagged_Inh*          |           Yes           |         0         |     -       |    Yes     |                                                         |       
+| *lagged_noInh*          |           Yes           |         50        |     50      |    No      |                                                         |
+| *nolagged_Inh*          |           Yes           |         0         |     -       |    Yes     |                                                         | 
 | *nolagged_noInh*        |           Yes           |         0         |     -       |    No      |                                                         |
-| *no_STRF*               |           No            |         -         |     -       |    Yes     |                                                         |
+| *no_STRF*               |           No            |         -         |     -       |    Yes     | Model withou STRFs                                      |
 | *shuffle_FBInhib*       |           Yes           |         50        |     50      |    Yes     | Shuffle all weights, related to feedback inhibition     |
 | *shuffle_FWInhib*       |           Yes           |         50        |     50      |    Yes     | Shuffle all weights, related to feedforward inhibition  |
 | *shuffleInhib_complete* |           Yes           |         50        |     50      |    Yes     | Shuffle all weights, related to inhibition              | 
@@ -43,3 +43,6 @@ Due to this, to get the complete evaluation, please follow the current order:
 3. Copy the ``` dsi_kim_Cells_TC.npy``` file to the *basis* directory and rename it to ```dsi_kim_Cells_TC_0p5_50ms.npy```
 4. Run in all other directories the ``` python analyze_DSI.py ``` script
 
+## Pre-trained model weights
+
+There can be found the set of five pre-trained model weights and the code for the figures about the aggregated model data on zenodo: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11122484.svg)](https://doi.org/10.5281/zenodo.11122484)
